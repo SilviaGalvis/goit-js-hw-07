@@ -1,24 +1,50 @@
 import { galleryItems } from './gallery-items.js';
-// Change code below this line
 
+const galleryContainer = document.querySelector('.gallery');
+const itemsMarkup = createGalleryItemsMarkup(galleryItems);
+galleryContainer.insertAdjacentHTML('beforeend', itemsMarkup);
+galleryContainer.addEventListener('click', onImgClick);
 
-const createItem = (item) => { 
-    return  `<li class="gallery__item">
-  <a class="gallery__link" href="${item.original}">
+// rendered items
+function createGalleryItemsMarkup(items) {
+  return items
+    .map(({ preview, original, description }) => {
+      return `<div class="gallery__item">
+  <a class="gallery__link" href="${original}">
     <img
       class="gallery__image"
-      src="${item.preview}"
-      data-source="${item.original}"
-      alt="Image description"
+      src="${preview}"
+      data-source="${original}"
+      alt="${description}"
     />
   </a>
-</li > `
+</div>`;
+    })
+    .join('');
 }
 
+const instance = basicLightbox.create(
+  `
+<img width="1280" height="auto" src="">`,
+  {
+    onShow: (instance) => {
+      window.addEventListener('keydown', onEscKeyPress);
+    },
+    onClose: (instance) => {
+      window.removeEventListener('keydown', onEscKeyPress);
+    },
+  }
+);
 
-const itemsContainer = document.querySelector('.gallery')
-for (const item of galleryItems) {
-    const newItem = createItem(item);
-    itemsContainer.innerHTML += newItem;
-};
+function onImgClick(e) {
+  e.preventDefault();
+  const datasetSource = e.target.dataset.source;
+  if (!datasetSource) return;
+  instance.element().querySelector('img').src = datasetSource;
+  instance.show();
+}
 
+function onEscKeyPress(e) {
+  if (e.code !== 'Escape') return;
+  instance.close();
+}
